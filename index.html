@@ -88,7 +88,7 @@
 
         function generateDownloadLink() {
             let url = document.getElementById("teraboxUrl").value.trim();
-            if (!url.includes("teraboxapp.com")) {
+            if (!url.includes("teraboxapp.com") && !url.includes("terabox.com")) {
                 alert("⚠️ Please enter a valid TeraBox link!");
                 return;
             }
@@ -100,7 +100,12 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ mode: "direct", url: url })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log("API Response:", data); 
                 
