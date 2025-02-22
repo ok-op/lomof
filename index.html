@@ -72,13 +72,14 @@
     <div class="container">
         <h2>🔥 TeraBox Video Downloader</h2>
         <input type="text" id="teraboxUrl" placeholder="Paste TeraBox link here...">
-        <button onclick="generateDownloadLink()">✅ Generate Download Link</button>
+        <button onclick="generateLink()">✅ Generate Link</button>
+        <button onclick="generateFile()" id="downloadButton" style="display:none;">📥 Download File</button>
 
         <div id="result">
             <h3>📌 Video Details</h3>
             <p><strong>Name:</strong> <span id="videoName"></span></p>
             <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
-            <a id="downloadLink" class="download-btn" download="2023-08-18 135409.mov">🔗 Download Now</a>
+            <a id="downloadLink" class="download-btn" target="_blank">🔗 Download Now</a>
         </div>
     </div>
 
@@ -86,28 +87,54 @@
         let fileUrl = "";
         let fileName = "TeraBox_Video.mp4";
 
-        function generateDownloadLink() {
+        // Step 1: Generate Link
+        function generateLink() {
             let url = document.getElementById("teraboxUrl").value.trim();
-            if (!url.includes("teraboxapp.com") && !url.includes("terabox.com")) {
+            if (!url.includes("teraboxapp.com")) {
                 alert("⚠️ Please enter a valid TeraBox link!");
                 return;
             }
 
             document.getElementById("result").style.display = "none";
+            document.getElementById("downloadButton").style.display = "none";
+
+            fetch("https://teradl-api.dapuntaratya.com/generate_link", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("API Response (generate_link):", data);
+                
+                if (data.success && data.data) {
+                    fileUrl = data.data;
+                    document.getElementById("downloadButton").style.display = "inline-block";
+                } else {
+                    alert("⚠️ Error generating link. Try again!");
+                }
+            })
+            .catch(error => {
+                alert("❌ API Error! Please try again.");
+                console.error(error);
+            });
+        }
+
+        // Step 2: Generate File and Download
+        function generateFile() {
+            if (!fileUrl) {
+                alert("⚠️ Please generate a link first!");
+                return;
+            }
 
             fetch("https://teradl-api.dapuntaratya.com/generate_file", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ mode: "direct", url: url })
+                body: JSON.stringify({ mode: "direct", url: fileUrl })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log("API Response:", data); 
+                console.log("API Response (generate_file):", data);
                 
                 if (data.list && data.list.length > 0) {
                     let video = data.list[0];
@@ -123,9 +150,15 @@
                     document.getElementById("videoName").innerText = fileName;
                     document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("downloadLink").href = fileUrl;
-                    document.getElementById("downloadLink").download = fileName; // Force correct file name
-                    
                     document.getElementById("result").style.display = "block";
+
+                    // Auto Download File
+                    let a = document.createElement("a");
+                    a.href = fileUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 } else {
                     alert("⚠️ Sorry, no download link found!");
                 }
