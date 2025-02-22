@@ -78,11 +78,14 @@
             <h3>📌 Video Details</h3>
             <p><strong>Name:</strong> <span id="videoName"></span></p>
             <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
-            <a id="downloadLink" href="#" class="download-btn" target="_blank">🔗 Download Now</a>
+            <a id="downloadLink" class="download-btn" target="_blank">🔗 Download Now</a>
         </div>
     </div>
 
     <script>
+        let fileUrl = "";
+        let fileName = "TeraBox_Video.mp4";
+
         function generateDownloadLink() {
             let url = document.getElementById("teraboxUrl").value.trim();
             if (!url.includes("teraboxapp.com")) {
@@ -92,23 +95,33 @@
 
             document.getElementById("result").style.display = "none";
 
-            fetch("https://api.gdriveproxy.me/terabox?url=" + encodeURIComponent(url))
+            fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mode: "direct", url: url })
+            })
             .then(response => response.json())
             .then(data => {
-                console.log("API Response:", data);
+                console.log("API Response:", data); 
+                
+                if (data.list && data.list.length > 0) {
+                    let video = data.list[0];
+                    let fileSizeMB = (video.size / (1024 * 1024)).toFixed(2);
+                    fileUrl = video.direct_link || video.path;
+                    fileName = video.name || "TeraBox_Video.mp4";
 
-                if (data.success) {
-                    let fileUrl = data.download;
-                    let fileName = data.name || "TeraBox_Video.mp4";
-                    let fileSizeMB = (data.size / (1024 * 1024)).toFixed(2);
+                    // TeraBox file link fix
+                    if (fileUrl.startsWith("/file")) {
+                        fileUrl = "https://www.terabox.com" + fileUrl;
+                    }
 
                     document.getElementById("videoName").innerText = fileName;
                     document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("downloadLink").href = fileUrl;
-
+                    
                     document.getElementById("result").style.display = "block";
                 } else {
-                    alert("⚠️ No download link found!");
+                    alert("⚠️ Sorry, no download link found!");
                 }
             })
             .catch(error => {
