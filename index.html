@@ -39,77 +39,79 @@
     <div id="result"></div>
 
     <script>
-    async function downloadVideo() {
-    let url = document.getElementById("teraboxUrl").value;
-    if (!url) {
-        alert("Please enter a valid Terabox URL");
-        return;
-    }
-
-    document.getElementById("result").innerHTML = "Processing... Please wait.";
-
-    try {
-        // 🔹 Step 1: Generate File Details
-        let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                mode: "default",
-                url: url
-            })
-        });
-
-        let data = await response.json();
-        console.log("File API Response:", data);
-
-        if (data.status === "success" && data.list && data.list.length > 0) {
-            let fileData = data.list[0];
-
-            // 🔹 Step 2: Generate Download Link
-            let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    mode: "default",
-                    js_token: data.js_token,
-                    cookie: data.cookie,
-                    sign: data.sign,
-                    timestamp: data.timestamp,
-                    shareid: data.shareid,
-                    uk: data.uk,
-                    fs_id: fileData.fs_id
-                })
-            });
-
-            let linkData = await linkResponse.json();
-            console.log("Download Link API Response:", linkData);
-
-            // ✅ Fix: Ensure the link is correctly extracted
-            if (linkData.status === "success" && linkData.download_link) {
-                let downloadURL = linkData.download_link;
-
-                document.getElementById("result").innerHTML = `
-                    <p><b>Download Link:</b> <a href="${downloadURL}" target="_blank" id="downloadBtn">Click Here</a></p>
-                `;
-
-                // 🔹 Auto Click to Start Download
-                document.getElementById("downloadBtn").click();
-            } else {
-                document.getElementById("result").innerHTML = "Failed to generate download link.";
+        async function downloadVideo() {
+            let url = document.getElementById("teraboxUrl").value;
+            if (!url) {
+                alert("Please enter a valid Terabox URL");
+                return;
             }
-        } else {
-            document.getElementById("result").innerHTML = "Failed to fetch file details.";
-        }
 
-    } catch (error) {
-        console.error(error);
-        document.getElementById("result").innerHTML = "Error fetching download link.";
-    }
-    }
+            document.getElementById("result").innerHTML = "Processing... Please wait.";
+
+            try {
+                // 🔹 Step 1: Generate File Details
+                let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mode: "default",
+                        url: url
+                    })
+                });
+
+                let data = await response.json();
+                console.log("File API Response:", data);
+
+                if (data.status === "success" && data.list && data.list.length > 0) {
+                    let fileData = data.list[0];
+
+                    // 🔹 Step 2: Generate Download Link
+                    let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            mode: "default",
+                            js_token: data.js_token,
+                            cookie: data.cookie,
+                            sign: data.sign,
+                            timestamp: data.timestamp,
+                            shareid: data.shareid,
+                            uk: data.uk,
+                            fs_id: fileData.fs_id
+                        })
+                    });
+
+                    let linkData = await linkResponse.json();
+                    console.log("Download Link API Response:", linkData);
+
+                    // ✅ Fix: Extract the actual download link
+                    if (linkData.status === "success" && linkData.download_link) {
+                        let downloadURL = linkData.download_link;
+
+                        document.getElementById("result").innerHTML = `
+                            <p><b>Download Link:</b> <a href="${downloadURL}" target="_blank" id="downloadBtn">Click Here</a></p>
+                        `;
+
+                        // 🔹 Auto Click to Start Download
+                        setTimeout(() => {
+                            document.getElementById("downloadBtn").click();
+                        }, 1000);
+                    } else {
+                        document.getElementById("result").innerHTML = "Failed to generate download link.";
+                    }
+                } else {
+                    document.getElementById("result").innerHTML = "Failed to fetch file details.";
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById("result").innerHTML = "Error fetching download link.";
+            }
+        }
     </script>
 
 </body>
