@@ -55,7 +55,7 @@
         <video id="videoPreview" controls></video>
 
         <!-- ডাউনলোড বাটন -->
-        <a id="downloadLink" target="_blank">🔗 এখনই ডাউনলোড করুন</a>
+        <a id="downloadLink" download target="_blank" type="video/mp4">🔗 এখনই ডাউনলোড করুন</a>
     </div>
 
     <script>
@@ -82,8 +82,12 @@
                     document.getElementById("videoName").innerText = video.name;
                     document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("videoPreview").src = video.path;
-                    document.getElementById("downloadLink").href = video.path;
-                    document.getElementById("downloadLink").setAttribute("download", video.name);
+                    
+                    let downloadLink = document.getElementById("downloadLink");
+                    downloadLink.href = video.path;
+                    downloadLink.download = video.name.endsWith(".mp4") ? video.name : video.name + ".mp4";
+                    downloadLink.type = "video/mp4";
+                    
                     document.getElementById("result").style.display = "block";
                 } else {
                     alert("⚠️ দুঃখিত, ডাউনলোড লিংক পাওয়া যায়নি!");
