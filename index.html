@@ -12,51 +12,27 @@
             padding: 20px;
             background-color: #f4f4f4;
         }
-	.wood {
-            color: white;
-            font-size: 8px;
-            padding: 5px;
-	 }   
         .logo {
+            width: 250px;
+            margin: 10px auto;
             display: block;
-            justify-content: center;
-            align-items: center;
-            margin: 10px auto 5px; /* উপরে 10px, নিচে 5px গ্যাপ */
-            width: 300px;  
-            height: 150px; /* ✅ Height কমানো হয়েছে */
-            object-fit: contain; /* ✅ ছবির আকৃতি ঠিক রাখবে */
-            text-align: center; /* ✅ কিছু ক্ষেত্রে কাজ করতে পারে */
         }
         .description {
             font-size: 18px;
             font-weight: bold;
             color: #222;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
             background: white;
             padding: 10px;
             border-radius: 10px;
-            box-shadow: 5px 5px 15px rgba(0, 0, 0);
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
             display: inline-block;
             margin-bottom: 20px;
         }
         input, button {
             padding: 10px;
             margin: 10px;
+            font-size: 16px;
         }
-        #downloadSection {
-            display: none;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0);
-            margin-top: 20px;
-        }
-        #thumbnail {
-            width: 200px;
-            display: none;
-            border-radius: 8px;
-        }
-        /* ✅ 3D Loading Spinner */
         #loadingSpinner {
             display: none;
             margin: 10px auto;
@@ -66,47 +42,39 @@
             border-top: 6px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            transform: translateY(-50%);
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* ✅ Fixed Footer (Centered) */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            padding: 5px;
-            font-size: 14px;
-            border-top: 6px solid transparent;
-            left: 0;
-            right: 0;
-	    border: 2px solid green;
-            box-shadow: 3px 6px DeepPink;
-            border-top-color: DarkMagenta;
+        #downloadSection {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
         }
-        /* ✅ Video Player Modal */
+        #thumbnail {
+            width: 200px;
+            display: none;
+            border-radius: 8px;
+        }
         #videoModal {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 4px 4px 8px rgba(43, 169, 237);
+            box-shadow: 4px 4px 8px rgba(43, 169, 237, 0.5);
         }
         #videoModal video {
             width: 100%;
             max-width: 600px;
             border-radius: 8px;
-            box-shadow: 4px 4px 8px rgba(202, 237, 232);
         }
         .close-btn {
             background: red;
@@ -122,41 +90,32 @@
 <body>
 
     <img src="https://i.ibb.co/fYSBVwf9/angel-op.png" alt="Logo" class="logo">
-    <div class="description">जो दिल के करीब थे ,वो जबसे दुश्मन हो गए
-जमाने में हुए चर्चे ,हम मशहूर हो गए</div>
+    <div class="description">TeraBox Video Downloader - Fast & Free</div>
 
     <input type="text" id="urlInput" placeholder="Enter TeraBox URL">
-    <button onclick="fetchDownloadLink()"><i class="fa fa-external-link" aria-hidden="true"></i> Get Download Link</button>
+    <button onclick="fetchDownloadLink()"><i class="fa fa-external-link"></i> Get Download Link</button>
     
-    <!-- ✅ 3D Loading Spinner -->
     <div id="loadingSpinner"></div>
 
     <div id="downloadSection">
-        <h3><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Download Details</h3>
+        <h3><i class="fa fa-download"></i> Download Details</h3>
         <p><strong>📄 File Name:</strong> <span id="fileName"></span></p>
         <p><strong>📦 File Size:</strong> <span id="fileSize"></span></p>
         <img id="thumbnail" src="" alt="Thumbnail">
         <br>
         <a id="downloadButton" style="display: none;" download>
-            <button><i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i> Download</button>
+            <button><i class="fa fa-arrow-circle-o-down"></i> Download</button>
         </a>
-        <button id="watchButton" style="display: none;" onclick="openVideoPlayer()"><i class="fa fa-play" aria-hidden="true"></i> Watch Online</button>
+        <button id="watchButton" style="display: none;" onclick="openVideoPlayer()"><i class="fa fa-play"></i> Watch Online</button>
         <a id="thumbButton" style="display: none;" download>
             <button>🖼 Download Thumbnail</button>
         </a>
     </div>
 
-    <!-- ✅ Video Modal Player -->
     <div id="videoModal">
         <video id="videoPlayer" controls></video>
         <br>
-        <button class="close-btn" onclick="closeVideoPlayer()"><b><i class="fa fa-times" aria-hidden="true"></i> Close</button>
-    </div>
-
-    <!-- ✅ Fixed Footer -->
-    <div class="footer">
-        Developed by <a href="https://t.me/Farooq_is_king" target="_blank" style="color: #ffcc00;"><i class="fa fa-user-circle-o" aria-hidden="true"></i> 𝐖𝐎𝐎𝐃𝐜𝐫𝐚𝐟𝐭</a>
-	    <p class="wood"> © 2025 TeraBox Video downloader & Player. All rights reserved.</p>
+        <button class="close-btn" onclick="closeVideoPlayer()"><i class="fa fa-times"></i> Close</button>
     </div>
 
     <script>
@@ -165,41 +124,36 @@
         function fetchDownloadLink() {
             const url = document.getElementById('urlInput').value.trim();
             if (!url) {
-                alert("Please enter a valid TeraBox URL");
+                alert("⚠ Please enter a valid TeraBox URL");
                 return;
             }
 
             const button = document.querySelector("button");
             const spinner = document.getElementById("loadingSpinner");
 
-            // ✅ 3D লোডিং স্পিনার চালু
             spinner.style.display = "block";
             button.disabled = true;
 
-            fetch(`https://teradl-api.dapuntaratya.com/?url=${encodeURIComponent(url)}`)
+            fetch(`https://api.terabox-dl.com/?url=${encodeURIComponent(url)}`)
             .then(response => response.json())
             .then(data => {
-                // ✅ লোডিং স্পিনার বন্ধ
                 spinner.style.display = "none";
                 button.disabled = false;
 
-                if (data.ok && data.downloadLink) {
-                    document.getElementById('fileName').innerText = data.filename || 'Unknown File';
-                    document.getElementById('fileSize').innerText = data.size || 'Unknown Size';
+                if (data.success && data.download_link) {
+                    document.getElementById('fileName').innerText = data.file_name || 'Unknown File';
+                    document.getElementById('fileSize').innerText = data.file_size || 'Unknown Size';
                     document.getElementById('downloadSection').style.display = 'block';
 
-                    // ✅ **Download Button**
                     const downloadButton = document.getElementById('downloadButton');
                     downloadButton.style.display = 'inline-block';
-                    downloadButton.href = data.downloadLink;
-                    downloadButton.setAttribute("download", data.filename || "video.mp4");
+                    downloadButton.href = data.download_link;
+                    downloadButton.setAttribute("download", data.file_name || "video.mp4");
 
-                    // ✅ **Watch Online Button (Updated)**
                     const watchButton = document.getElementById('watchButton');
                     watchButton.style.display = 'inline-block';
-                    videoURL = data.downloadLink;
+                    videoURL = data.download_link;
 
-                    // ✅ **Thumbnail**
                     const thumbnail = document.getElementById('thumbnail');
                     const thumbButton = document.getElementById('thumbButton');
                     if (data.thumbnail) {
@@ -213,29 +167,27 @@
                         thumbButton.style.display = 'none';
                     }
                 } else {
-                    alert('Download link not available.');
+                    alert('❌ Download link not available.');
                 }
             })
             .catch(error => {
-                console.error('Error fetching download link:', error);
-                alert('Failed to get download link.');
+                console.error('Error:', error);
+                alert('❌ Failed to get download link.');
                 spinner.style.display = "none";
                 button.disabled = false;
             });
         }
 
-        // ✅ Open Video Player Modal
         function openVideoPlayer() {
             const videoPlayer = document.getElementById('videoPlayer');
             if (videoURL) {
                 videoPlayer.src = videoURL;
                 document.getElementById('videoModal').style.display = 'block';
             } else {
-                alert("Video not available.");
+                alert("⚠ Video not available.");
             }
         }
 
-        // ✅ Close Video Player
         function closeVideoPlayer() {
             document.getElementById('videoModal').style.display = 'none';
             document.getElementById('videoPlayer').pause();
