@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>TeraBox Video Downloader</title>
+    <title>TeraBox ভিডিও ডাউনলোডার</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,185 +11,60 @@
             padding: 20px;
             background-color: #f4f4f4;
         }
-        .logo {
-            width: 250px;
-            margin: 10px auto;
-            display: block;
-        }
-        .description {
-            font-size: 18px;
-            font-weight: bold;
-            color: #222;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
-            display: inline-block;
-            margin-bottom: 20px;
-        }
         input, button {
             padding: 10px;
             margin: 10px;
-            font-size: 16px;
-        }
-        #loadingSpinner {
-            display: none;
-            margin: 10px auto;
-            width: 40px;
-            height: 40px;
-            border: 6px solid #0044ff;
-            border-top: 6px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
         #downloadSection {
             display: none;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
-        }
-        #thumbnail {
-            width: 200px;
-            display: none;
-            border-radius: 8px;
-        }
-        #videoModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 4px 4px 8px rgba(43, 169, 237, 0.5);
-        }
-        #videoModal video {
-            width: 100%;
-            max-width: 600px;
-            border-radius: 8px;
-        }
-        .close-btn {
-            background: red;
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <img src="https://i.ibb.co/fYSBVwf9/angel-op.png" alt="Logo" class="logo">
-    <div class="description">TeraBox Video Downloader - Fast & Free</div>
-
-    <input type="text" id="urlInput" placeholder="Enter TeraBox URL">
-    <button onclick="fetchDownloadLink()"><i class="fa fa-external-link"></i> Get Download Link</button>
-    
-    <div id="loadingSpinner"></div>
+    <h1>TeraBox ভিডিও ডাউনলোডার</h1>
+    <input type="text" id="urlInput" placeholder="TeraBox লিংক প্রবেশ করুন">
+    <button onclick="fetchDownloadLink()">ডাউনলোড লিংক পান</button>
 
     <div id="downloadSection">
-        <h3><i class="fa fa-download"></i> Download Details</h3>
-        <p><strong>📄 File Name:</strong> <span id="fileName"></span></p>
-        <p><strong>📦 File Size:</strong> <span id="fileSize"></span></p>
-        <img id="thumbnail" src="" alt="Thumbnail">
-        <br>
+        <h3>ডাউনলোড বিস্তারিত</h3>
+        <p><strong>ফাইল নাম:</strong> <span id="fileName"></span></p>
         <a id="downloadButton" style="display: none;" download>
-            <button><i class="fa fa-arrow-circle-o-down"></i> Download</button>
+            <button>ডাউনলোড</button>
         </a>
-        <button id="watchButton" style="display: none;" onclick="openVideoPlayer()"><i class="fa fa-play"></i> Watch Online</button>
-        <a id="thumbButton" style="display: none;" download>
-            <button>🖼 Download Thumbnail</button>
-        </a>
-    </div>
-
-    <div id="videoModal">
-        <video id="videoPlayer" controls></video>
-        <br>
-        <button class="close-btn" onclick="closeVideoPlayer()"><i class="fa fa-times"></i> Close</button>
     </div>
 
     <script>
-        let videoURL = "";
-
         function fetchDownloadLink() {
             const url = document.getElementById('urlInput').value.trim();
             if (!url) {
-                alert("⚠ Please enter a valid TeraBox URL");
+                alert("অনুগ্রহ করে একটি বৈধ TeraBox লিংক প্রবেশ করুন");
                 return;
             }
 
-            const button = document.querySelector("button");
-            const spinner = document.getElementById("loadingSpinner");
-
-            spinner.style.display = "block";
-            button.disabled = true;
-
-            fetch(`https://api.terabox-dl.com/?url=${encodeURIComponent(url)}`)
+            fetch(`https://teraboxdownloader.top/api.php?link=${encodeURIComponent(url)}`)
             .then(response => response.json())
             .then(data => {
-                spinner.style.display = "none";
-                button.disabled = false;
-
-                if (data.success && data.download_link) {
-                    document.getElementById('fileName').innerText = data.file_name || 'Unknown File';
-                    document.getElementById('fileSize').innerText = data.file_size || 'Unknown Size';
+                if (data.url) {
+                    document.getElementById('fileName').innerText = 'ডাউনলোড লিংক প্রস্তুত';
                     document.getElementById('downloadSection').style.display = 'block';
 
                     const downloadButton = document.getElementById('downloadButton');
                     downloadButton.style.display = 'inline-block';
-                    downloadButton.href = data.download_link;
-                    downloadButton.setAttribute("download", data.file_name || "video.mp4");
-
-                    const watchButton = document.getElementById('watchButton');
-                    watchButton.style.display = 'inline-block';
-                    videoURL = data.download_link;
-
-                    const thumbnail = document.getElementById('thumbnail');
-                    const thumbButton = document.getElementById('thumbButton');
-                    if (data.thumbnail) {
-                        thumbnail.src = data.thumbnail;
-                        thumbnail.style.display = 'block';
-                        thumbButton.style.display = 'inline-block';
-                        thumbButton.href = data.thumbnail;
-                        thumbButton.setAttribute("download", "thumbnail.jpg");
-                    } else {
-                        thumbnail.style.display = 'none';
-                        thumbButton.style.display = 'none';
-                    }
+                    downloadButton.href = data.url;
                 } else {
-                    alert('❌ Download link not available.');
+                    alert('ডাউনলোড লিংক পাওয়া যায়নি।');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('❌ Failed to get download link.');
-                spinner.style.display = "none";
-                button.disabled = false;
+                console.error('ডাউনলোড লিংক প্রাপ্তিতে ত্রুটি:', error);
+                alert('ডাউনলোড লিংক প্রাপ্তিতে ব্যর্থ।');
             });
-        }
-
-        function openVideoPlayer() {
-            const videoPlayer = document.getElementById('videoPlayer');
-            if (videoURL) {
-                videoPlayer.src = videoURL;
-                document.getElementById('videoModal').style.display = 'block';
-            } else {
-                alert("⚠ Video not available.");
-            }
-        }
-
-        function closeVideoPlayer() {
-            document.getElementById('videoModal').style.display = 'none';
-            document.getElementById('videoPlayer').pause();
         }
     </script>
 
