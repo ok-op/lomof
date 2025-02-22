@@ -1,151 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terabox Video Downloader</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0f0f0;
-      flex-direction: column;
-    }
-    #downloadForm {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    #videoUrl {
-      padding: 10px;
-      width: 300px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    #downloadBtn {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #downloadBtn:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terabox Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <form id="downloadForm">
-    <input type="text" id="videoUrl" placeholder="Enter Terabox Video URL" required>
-    <button type="submit" id="downloadBtn">Download Video</button>
-  </form>
 
-  <script>
-    const api = 'https://teradl-api.dapuntaratya.com';
-    let mode = 1; // Default mode
+    <h2>Terabox Video Downloader</h2>
+    <input type="text" id="teraboxUrl" placeholder="Enter Terabox Link">
+    <button onclick="downloadVideo()">Download</button>
+    
+    <div id="result"></div>
 
-    // Get API configuration
-    async function getConfig() {
-      const url = `${api}/get_config`;
-      const headers = { 'Content-Type': 'application/json' };
-      const data = {
-        method: 'GET',
-        mode: 'cors',
-        headers: headers,
-      };
+    <script>
+        async function downloadVideo() {
+            let url = document.getElementById("teraboxUrl").value;
+            if (!url) {
+                alert("Please enter a valid Terabox URL");
+                return;
+            }
 
-      try {
-        const req = await fetch(url, data);
-        const response = await req.json();
-        console.log("Config Response:", response); // Log the response
-        return response.mode;
-      } catch (error) {
-        console.error("Error in getConfig:", error);
-        throw error;
-      }
-    }
+            document.getElementById("result").innerHTML = "Processing... Please wait.";
 
-    // Handle form submission
-    document.getElementById("downloadForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const downloadBtn = document.getElementById("downloadBtn");
-      const videoUrl = document.getElementById("videoUrl").value;
+            try {
+                // 🔹 Step 1: Generate File Details
+                let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mode: "default",
+                        url: url
+                    })
+                });
 
-      if (!videoUrl) {
-        alert("Please enter a valid Terabox video URL.");
-        return;
-      }
+                let data = await response.json();
+                console.log("File API Response:", data);
 
-      downloadBtn.disabled = true;
-      downloadBtn.innerText = "Downloading...";
+                if (data.status === "success" && data.list && data.list.length > 0) {
+                    let fileData = data.list[0];
 
-      try {
-        // Step 1: Get API mode
-        mode = await getConfig();
-        console.log("Mode:", mode); // Log the mode
+                    // 🔹 Step 2: Generate Download Link
+                    let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            mode: "default",
+                            js_token: data.js_token,
+                            cookie: data.cookie,
+                            sign: data.sign,
+                            timestamp: data.timestamp,
+                            shareid: data.shareid,
+                            uk: data.uk,
+                            fs_id: fileData.fs_id
+                        })
+                    });
 
-        // Step 2: Generate file details
-        const generateFileResponse = await fetch(`${api}/generate_file`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: mode,
-            url: videoUrl,
-          }),
-        });
-        const fileData = await generateFileResponse.json();
-        console.log("File Data:", fileData); // Log the file data
+                    let linkData = await linkResponse.json();
+                    console.log("Download Link API Response:", linkData);
 
-        if (fileData.status !== "success") {
-          throw new Error("Failed to generate file details");
+                    // ✅ Fix: Extract the actual download link
+                    if (linkData.status === "success" && linkData.download_link) {
+                        let downloadURL = linkData.download_link;
+
+                        document.getElementById("result").innerHTML = `
+                            <p><b>Download Link:</b> <a href="${downloadURL}" target="_blank" id="downloadBtn">Click Here</a></p>
+                        `;
+
+                        // 🔹 Auto Click to Start Download
+                        setTimeout(() => {
+                            document.getElementById("downloadBtn").click();
+                        }, 1000);
+                    } else {
+                        document.getElementById("result").innerHTML = "Failed to generate download link.";
+                    }
+                } else {
+                    document.getElementById("result").innerHTML = "Failed to fetch file details.";
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById("result").innerHTML = "Error fetching download link.";
+            }
         }
+    </script>
 
-        // Step 3: Generate download link
-        const generateLinkResponse = await fetch(`${api}/generate_link`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: mode,
-            js_token: fileData.js_token,
-            cookie: fileData.cookie,
-            sign: fileData.sign,
-            timestamp: fileData.timestamp,
-            shareid: fileData.shareid,
-            uk: fileData.uk,
-            fs_id: fileData.list[0].fs_id, // Assuming the first item in the list
-          }),
-        });
-        const linkData = await generateLinkResponse.json();
-        console.log("Link Data:", linkData); // Log the link data
-
-        if (linkData.status !== "success") {
-          throw new Error("Failed to generate download link");
-        }
-
-        // Step 4: Initiate download
-        const downloadLink = linkData.download_link;
-        console.log("Download Link:", downloadLink); // Log the download link
-        window.location.href = downloadLink; // Redirect to the download link
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to download the video. Please try again.");
-      } finally {
-        downloadBtn.disabled = false;
-        downloadBtn.innerText = "Download Video";
-      }
-    });
-  </script>
 </body>
 </html>
