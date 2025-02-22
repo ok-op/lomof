@@ -78,7 +78,7 @@
             <h3>📌 Video Details</h3>
             <p><strong>Name:</strong> <span id="videoName"></span></p>
             <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
-            <a id="downloadLink" class="download-btn" target="_blank">🔗 Download Now</a>
+            <a id="downloadLink" class="download-btn" download="2023-08-18 135409.mov">🔗 Download Now</a>
         </div>
     </div>
 
@@ -123,7 +123,7 @@
                     document.getElementById("videoName").innerText = fileName;
                     document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("downloadLink").href = fileUrl;
-                    document.getElementById("downloadLink").download = fileName; // Force download
+                    document.getElementById("downloadLink").download = fileName; // Force correct file name
                     
                     document.getElementById("result").style.display = "block";
                 } else {
