@@ -39,44 +39,69 @@
     <div id="result"></div>
 
     <script>
-        async function downloadVideo() {
-            let url = document.getElementById("teraboxUrl").value;
-            if (!url) {
-                alert("Please enter a valid Terabox URL");
-                return;
-            }
+    async function downloadVideo() {
+        let url = document.getElementById("teraboxUrl").value;
+        if (!url) {
+            alert("Please enter a valid Terabox URL");
+            return;
+        }
 
-            document.getElementById("result").innerHTML = "Processing... Please wait.";
+        document.getElementById("result").innerHTML = "Processing... Please wait.";
 
-            try {
-                let response = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
+        try {
+            let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    mode: "default",
+                    url: url
+                })
+            });
+
+            let data = await response.json();
+            console.log(data);
+
+            if (data.status === "success" && data.list && data.list.length > 0) {
+                let fileData = data.list[0];
+
+                let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        mode: "your_mode",
-                        url: url
+                        mode: "default",
+                        js_token: data.js_token,
+                        cookie: data.cookie,
+                        sign: data.sign,
+                        timestamp: data.timestamp,
+                        shareid: data.shareid,
+                        uk: data.uk,
+                        fs_id: fileData.fs_id
                     })
                 });
 
-                let data = await response.json();
-                console.log(data);
+                let linkData = await linkResponse.json();
+                console.log(linkData);
 
-                if (data.status === "success" && data.download_link) {
-                    let downloadLink = data.download_link;
+                if (linkData.status === "success" && linkData.download_link) {
                     document.getElementById("result").innerHTML = `
-                        <p><b>Download Link:</b> <a href="${downloadLink}" target="_blank" download>Click Here</a></p>
+                        <p><b>Download Link:</b> <a href="${linkData.download_link}" target="_blank">Click Here</a></p>
                     `;
                 } else {
                     document.getElementById("result").innerHTML = "Failed to generate download link.";
                 }
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById("result").innerHTML = "Error fetching download link.";
+            } else {
+                document.getElementById("result").innerHTML = "Failed to fetch file details.";
             }
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById("result").innerHTML = "Error fetching download link.";
         }
+    }
     </script>
 
 </body>
