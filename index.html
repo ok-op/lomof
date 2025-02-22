@@ -76,19 +76,8 @@
 
                     let downloadLink = document.getElementById("downloadLink");
                     downloadLink.href = video.path;
-                    downloadLink.setAttribute("download", video.name.endsWith(".mp4") ? video.name : video.name + ".mp4");
-
-                    // ক্লিক করলেই ডাউনলোড শুরু হবে
-                    downloadLink.onclick = function(e) {
-                        e.preventDefault();
-                        let a = document.createElement("a");
-                        a.href = video.path;
-                        a.download = video.name.endsWith(".mp4") ? video.name : video.name + ".mp4";
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    };
-
+                    downloadLink.target = "_blank"; // নতুন ট্যাবে খোলার জন্য
+                    
                     document.getElementById("result").style.display = "block";
                 } else {
                     alert("⚠️ দুঃখিত, ডাউনলোড লিংক পাওয়া যায়নি!");
