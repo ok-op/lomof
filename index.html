@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,24 +37,24 @@
 </head>
 <body>
 
-    <h2>🔥 TeraBox ভিডিও ডাউনলোডার</h2>
-    <input type="text" id="teraboxUrl" placeholder="TeraBox লিংক পেস্ট করুন..." size="50">
-    <button onclick="generateDownloadLink()">✅ ডাউনলোড লিংক তৈরি করুন</button>
+    <h2>🔥 TeraBox Video Downloader</h2>
+    <input type="text" id="teraboxUrl" placeholder="Paste TeraBox link here..." size="50">
+    <button onclick="generateDownloadLink()">✅ Generate Download Link</button>
 
     <div id="result">
-        <h3>📌 ভিডিও তথ্য</h3>
-        <p><strong>নাম:</strong> <span id="videoName"></span></p>
-        <p><strong>সাইজ:</strong> <span id="videoSize"></span> MB</p>
+        <h3>📌 Video Details</h3>
+        <p><strong>Name:</strong> <span id="videoName"></span></p>
+        <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
 
-        <!-- ডাউনলোড বাটন -->
-        <a id="downloadLink" target="_blank">🔗 এখনই ডাউনলোড করুন</a>
+        <!-- Download Button -->
+        <a id="downloadLink" target="_blank">🔗 Download Now</a>
     </div>
 
     <script>
         function generateDownloadLink() {
             let url = document.getElementById("teraboxUrl").value.trim();
             if (!url.includes("teraboxapp.com")) {
-                alert("⚠️ দয়া করে একটি বৈধ TeraBox লিংক পেস্ট করুন!");
+                alert("⚠️ Please enter a valid TeraBox link!");
                 return;
             }
 
@@ -76,15 +76,22 @@
 
                     let downloadLink = document.getElementById("downloadLink");
                     downloadLink.href = video.path;
-                    downloadLink.target = "_blank"; // নতুন ট্যাবে খোলার জন্য
-                    
+                    downloadLink.target = "_blank"; // Open in a new tab
+
+                    // Auto-download when the button is clicked
+                    downloadLink.onclick = function(e) {
+                        e.preventDefault();
+                        let newTab = window.open(video.path, "_blank");
+                        setTimeout(() => newTab.close(), 3000); // Close after 3 sec
+                    };
+
                     document.getElementById("result").style.display = "block";
                 } else {
-                    alert("⚠️ দুঃখিত, ডাউনলোড লিংক পাওয়া যায়নি!");
+                    alert("⚠️ Sorry, no download link found!");
                 }
             })
             .catch(error => {
-                alert("❌ API ত্রুটি! আবার চেষ্টা করুন।");
+                alert("❌ API Error! Please try again.");
                 console.error(error);
             });
         }
