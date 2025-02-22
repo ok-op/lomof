@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terabox Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Terabox Video Downloader</h2>
+    <input type="text" id="teraboxUrl" placeholder="Enter Terabox Link">
+    <button onclick="downloadVideo()">Download</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function downloadVideo() {
+            let url = document.getElementById("teraboxUrl").value;
+            if (!url) {
+                alert("Please enter a valid Terabox URL");
+                return;
+            }
+
+            document.getElementById("result").innerHTML = "Processing... Please wait.";
+
+            try {
+                let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mode: "your_mode",
+                        url: url
+                    })
+                });
+
+                let data = await response.json();
+                console.log(data);
+
+                if (data.status === "success" && data.list && data.list.length > 0) {
+                    let downloadLink = data.list[0].download_link;
+                    document.getElementById("result").innerHTML = `
+                        <p><b>Download Link:</b> <a href="${downloadLink}" target="_blank">Click Here</a></p>
+                    `;
+                } else {
+                    document.getElementById("result").innerHTML = "Failed to generate download link.";
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById("result").innerHTML = "Error fetching download link.";
+            }
+        }
+    </script>
+
+</body>
+  </html>
