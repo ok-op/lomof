@@ -70,13 +70,14 @@
                 if (data.list && data.list.length > 0) {
                     let video = data.list[0];
                     let fileSizeMB = (video.size / (1024 * 1024)).toFixed(2);
+                    let fileUrl = video.direct_link || video.path; // সঠিক ডাউনলোড লিংক
 
                     document.getElementById("videoName").innerText = video.name;
                     document.getElementById("videoSize").innerText = fileSizeMB;
 
                     let downloadLink = document.getElementById("downloadLink");
-                    downloadLink.href = video.path + "?download=1"; // Force download
-                    downloadLink.setAttribute("download", video.name); // Set filename
+                    downloadLink.href = fileUrl;
+                    downloadLink.setAttribute("download", video.name); // ফোর্স ডাউনলোড
                     
                     document.getElementById("result").style.display = "block";
                 } else {
