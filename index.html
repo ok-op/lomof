@@ -47,7 +47,7 @@
         <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
 
         <!-- Download Button -->
-        <a id="downloadLink" download>🔗 Download Now</a>
+        <a id="downloadLink" target="_blank">🔗 Download Now</a>
     </div>
 
     <script>
@@ -67,17 +67,24 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log("API Response:", data); // ✅ API রেসপন্স চেক করতে
+                
                 if (data.list && data.list.length > 0) {
                     let video = data.list[0];
                     let fileSizeMB = (video.size / (1024 * 1024)).toFixed(2);
-                    let fileUrl = video.direct_link || video.path; // সঠিক ডাউনলোড লিংক
+                    let fileUrl = video.direct_link || video.path;
+
+                    // ✅ যদি লিংক `/file` দিয়ে শুরু হয়, তাহলে `https://www.terabox.com` যোগ করা হবে।
+                    if (fileUrl.startsWith("/file")) {
+                        fileUrl = "https://www.terabox.com" + fileUrl;
+                    }
 
                     document.getElementById("videoName").innerText = video.name;
                     document.getElementById("videoSize").innerText = fileSizeMB;
 
                     let downloadLink = document.getElementById("downloadLink");
                     downloadLink.href = fileUrl;
-                    downloadLink.setAttribute("download", video.name); // ফোর্স ডাউনলোড
+                    downloadLink.setAttribute("download", video.name); // ✅ ফোর্স ডাউনলোড
                     
                     document.getElementById("result").style.display = "block";
                 } else {
