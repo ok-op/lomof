@@ -61,6 +61,7 @@
             border-radius: 5px;
             display: inline-block;
             margin-top: 10px;
+            cursor: pointer;
         }
         .download-btn:hover {
             background: #0056b3;
@@ -80,11 +81,13 @@
             <p><strong>Size:</strong> <span id="videoSize"></span> MB</p>
 
             <!-- Download Button -->
-            <a id="downloadLink" class="download-btn" download>🔗 Download Now</a>
+            <a id="downloadLink" class="download-btn" onclick="startDownload()">🔗 Download Now</a>
         </div>
     </div>
 
     <script>
+        let fileUrl = "";
+
         function generateDownloadLink() {
             let url = document.getElementById("teraboxUrl").value.trim();
             if (!url.includes("teraboxapp.com")) {
@@ -106,7 +109,7 @@
                 if (data.list && data.list.length > 0) {
                     let video = data.list[0];
                     let fileSizeMB = (video.size / (1024 * 1024)).toFixed(2);
-                    let fileUrl = video.direct_link || video.path;
+                    fileUrl = video.direct_link || video.path;
                     let fileName = video.name || "TeraBox_Video.mp4";
 
                     if (fileUrl.startsWith("/file")) {
@@ -115,10 +118,7 @@
 
                     document.getElementById("videoName").innerText = fileName;
                     document.getElementById("videoSize").innerText = fileSizeMB;
-
-                    let downloadLink = document.getElementById("downloadLink");
-                    downloadLink.href = fileUrl;
-                    downloadLink.download = fileName;
+                    document.getElementById("downloadLink").style.display = "inline-block";
 
                     document.getElementById("result").style.display = "block";
                 } else {
@@ -129,6 +129,14 @@
                 alert("❌ API Error! Please try again.");
                 console.error(error);
             });
+        }
+
+        function startDownload() {
+            if (fileUrl) {
+                window.open(fileUrl, "_blank");
+            } else {
+                alert("❌ No download link found!");
+            }
         }
     </script>
 
