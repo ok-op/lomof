@@ -3,67 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraBox ভিডিও ডাউনলোডার</title>
+    <title>TeraBox Downloader</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            margin: 20px;
             background-color: #f4f4f4;
         }
+        h2 { color: #333; }
         input, button {
             padding: 10px;
             margin: 10px;
+            font-size: 16px;
         }
-        #downloadSection {
-            display: none;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        #result {
             margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #fff;
+            display: none;
+        }
+        a {
+            text-decoration: none;
+            color: white;
+            background: green;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <h1>TeraBox ভিডিও ডাউনলোডার</h1>
-    <input type="text" id="urlInput" placeholder="TeraBox লিংক প্রবেশ করুন">
-    <button onclick="fetchDownloadLink()">ডাউনলোড লিংক পান</button>
+    <h2>🔥 TeraBox ভিডিও ডাউনলোডার</h2>
+    <input type="text" id="teraboxUrl" placeholder="TeraBox লিংক পেস্ট করুন..." size="50">
+    <button onclick="generateDownloadLink()">✅ ডাউনলোড লিংক তৈরি করুন</button>
 
-    <div id="downloadSection">
-        <h3>ডাউনলোড বিস্তারিত</h3>
-        <p><strong>ফাইল নাম:</strong> <span id="fileName"></span></p>
-        <a id="downloadButton" style="display: none;" download>
-            <button>ডাউনলোড</button>
-        </a>
+    <div id="result">
+        <h3>📌 ভিডিও তথ্য</h3>
+        <p><strong>নাম:</strong> <span id="videoName"></span></p>
+        <p><strong>সাইজ:</strong> <span id="videoSize"></span> MB</p>
+        <a id="downloadLink" target="_blank">🔗 এখনই ডাউনলোড করুন</a>
     </div>
 
     <script>
-        function fetchDownloadLink() {
-            const url = document.getElementById('urlInput').value.trim();
-            if (!url) {
-                alert("অনুগ্রহ করে একটি বৈধ TeraBox লিংক প্রবেশ করুন");
+        function generateDownloadLink() {
+            let url = document.getElementById("teraboxUrl").value.trim();
+            if (!url.includes("teraboxapp.com")) {
+                alert("⚠️ দয়া করে একটি বৈধ TeraBox লিংক পেস্ট করুন!");
                 return;
             }
 
-            fetch(`https://teraboxdownloader.top/api.php?link=${encodeURIComponent(url)}`)
+            document.getElementById("result").style.display = "none";
+
+            fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mode: "direct", url: url })
+            })
             .then(response => response.json())
             .then(data => {
-                if (data.url) {
-                    document.getElementById('fileName').innerText = 'ডাউনলোড লিংক প্রস্তুত';
-                    document.getElementById('downloadSection').style.display = 'block';
-
-                    const downloadButton = document.getElementById('downloadButton');
-                    downloadButton.style.display = 'inline-block';
-                    downloadButton.href = data.url;
+                if (data.list && data.list.length > 0) {
+                    let video = data.list[0];
+                    document.getElementById("videoName").innerText = video.name;
+                    document.getElementById("videoSize").innerText = (video.size / (1024 * 1024)).toFixed(2);
+                    document.getElementById("downloadLink").href = video.path;
+                    document.getElementById("result").style.display = "block";
                 } else {
-                    alert('ডাউনলোড লিংক পাওয়া যায়নি।');
+                    alert("⚠️ দুঃখিত, ডাউনলোড লিংক পাওয়া যায়নি!");
                 }
             })
             .catch(error => {
-                console.error('ডাউনলোড লিংক প্রাপ্তিতে ত্রুটি:', error);
-                alert('ডাউনলোড লিংক প্রাপ্তিতে ব্যর্থ।');
+                alert("❌ API ত্রুটি! আবার চেষ্টা করুন।");
+                console.error(error);
             });
         }
     </script>
