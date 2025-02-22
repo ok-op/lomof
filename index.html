@@ -67,10 +67,16 @@
             .then(data => {
                 if (data.list && data.list.length > 0) {
                     let video = data.list[0];
+                    let fileSizeMB = (video.size / (1024 * 1024)).toFixed(2);
+
                     document.getElementById("videoName").innerText = video.name;
-                    document.getElementById("videoSize").innerText = (video.size / (1024 * 1024)).toFixed(2);
+                    document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("downloadLink").href = video.path;
+                    document.getElementById("downloadLink").setAttribute("download", video.name);
                     document.getElementById("result").style.display = "block";
+
+                    // 🔥 অটো ডাউনলোড শুরু করবে
+                    forceDownload(video.path, video.name);
                 } else {
                     alert("⚠️ দুঃখিত, ডাউনলোড লিংক পাওয়া যায়নি!");
                 }
@@ -79,6 +85,15 @@
                 alert("❌ API ত্রুটি! আবার চেষ্টা করুন।");
                 console.error(error);
             });
+        }
+
+        function forceDownload(url, fileName) {
+            const a = document.createElement("a");
+            a.href = url;
+            a.setAttribute("download", fileName);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 
