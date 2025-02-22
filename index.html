@@ -33,11 +33,6 @@
             display: inline-block;
             margin-top: 10px;
         }
-        video {
-            width: 80%;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-        }
     </style>
 </head>
 <body>
@@ -50,9 +45,6 @@
         <h3>📌 ভিডিও তথ্য</h3>
         <p><strong>নাম:</strong> <span id="videoName"></span></p>
         <p><strong>সাইজ:</strong> <span id="videoSize"></span> MB</p>
-        
-        <!-- ভিডিও প্রিভিউ -->
-        <video id="videoPreview" controls></video>
 
         <!-- ডাউনলোড বাটন -->
         <a id="downloadLink" target="_blank">🔗 এখনই ডাউনলোড করুন</a>
@@ -81,13 +73,12 @@
 
                     document.getElementById("videoName").innerText = video.name;
                     document.getElementById("videoSize").innerText = fileSizeMB;
-                    document.getElementById("videoPreview").src = video.path;
-                    
+
                     let downloadLink = document.getElementById("downloadLink");
                     downloadLink.href = video.path;
                     downloadLink.setAttribute("download", video.name.endsWith(".mp4") ? video.name : video.name + ".mp4");
 
-                    // ফোর্স ডাউনলোড করার জন্য নিচের অংশ যুক্ত করা হলো
+                    // ক্লিক করলেই ডাউনলোড শুরু হবে
                     downloadLink.onclick = function(e) {
                         e.preventDefault();
                         let a = document.createElement("a");
