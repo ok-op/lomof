@@ -49,7 +49,7 @@
             document.getElementById("result").innerHTML = "Processing... Please wait.";
 
             try {
-                // 🔹 Step 1: Generate File Details
+                // Step 1: Fetch file details
                 let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
                     method: "POST",
                     headers: {
@@ -67,7 +67,7 @@
                 if (data.status === "success" && data.list && data.list.length > 0) {
                     let fileData = data.list[0];
 
-                    // 🔹 Step 2: Generate Download Link
+                    // Step 2: Generate download link
                     let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
                         method: "POST",
                         headers: {
@@ -88,7 +88,7 @@
                     let linkData = await linkResponse.json();
                     console.log("Download Link API Response:", linkData);
 
-                    // ✅ Fix: Extract the actual download link
+                    // Step 3: Extract the actual download link
                     if (linkData.status === "success" && linkData.download_link) {
                         let downloadURL = linkData.download_link;
 
@@ -96,7 +96,7 @@
                             <p><b>Download Link:</b> <a href="${downloadURL}" target="_blank" id="downloadBtn">Click Here</a></p>
                         `;
 
-                        // 🔹 Auto Click to Start Download
+                        // Auto-click to start download
                         setTimeout(() => {
                             document.getElementById("downloadBtn").click();
                         }, 1000);
