@@ -12,6 +12,20 @@
       align-items: center;
       height: 100vh;
       background-color: #f0f0f0;
+      flex-direction: column;
+    }
+    #downloadForm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #videoUrl {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
     #downloadBtn {
       padding: 10px 20px;
@@ -29,32 +43,99 @@
   </style>
 </head>
 <body>
-  <button id="downloadBtn" onclick="downloadVideo()">Download Video</button>
+  <form id="downloadForm">
+    <input type="text" id="videoUrl" placeholder="Enter Terabox Video URL" required>
+    <button type="submit" id="downloadBtn">Download Video</button>
+  </form>
 
   <script>
-    const apiBaseUrl = "https://teradl-api.dapuntaratya.com";
-    const videoUrl = "https://teraboxapp.com/s/1PeZb7Yfl6MUWTXxksAMaXg"; // আপনার ভিডিওর ইউআরএল
+    const api = 'https://teradl-api.dapuntaratya.com';
+    let mode = 1; // Default mode
 
-    function downloadVideo() {
+    // Get API configuration
+    async function getConfig() {
+      const url = `${api}/get_config`;
+      const headers = { 'Content-Type': 'application/json' };
+      const data = {
+        method: 'GET',
+        mode: 'cors',
+        headers: headers,
+      };
+
+      const req = await fetch(url, data);
+      const response = await req.json();
+      return response.mode;
+    }
+
+    // Handle form submission
+    document.getElementById("downloadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
       const downloadBtn = document.getElementById("downloadBtn");
+      const videoUrl = document.getElementById("videoUrl").value;
+
+      if (!videoUrl) {
+        alert("Please enter a valid Terabox video URL.");
+        return;
+      }
+
       downloadBtn.disabled = true;
       downloadBtn.innerText = "Downloading...";
 
-      // ভিডিও ইউআরএল এনকোড করুন
-      const encodedVideoUrl = encodeURIComponent(videoUrl);
+      try {
+        // Step 1: Get API mode
+        mode = await getConfig();
 
-      // সরাসরি ডাউনলোড লিঙ্ক তৈরি করুন
-      const downloadLink = `${apiBaseUrl}/?url=${encodedVideoUrl}`;
+        // Step 2: Generate file details
+        const generateFileResponse = await fetch(`${api}/generate_file`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: mode,
+            url: videoUrl,
+          }),
+        });
+        const fileData = await generateFileResponse.json();
 
-      // ডাউনলোড শুরু করুন
-      window.location.href = downloadLink;
+        if (fileData.status !== "success") {
+          throw new Error("Failed to generate file details");
+        }
 
-      // বাটন স্টেট রিসেট করুন
-      setTimeout(() => {
+        // Step 3: Generate download link
+        const generateLinkResponse = await fetch(`${api}/generate_link`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: mode,
+            js_token: fileData.js_token,
+            cookie: fileData.cookie,
+            sign: fileData.sign,
+            timestamp: fileData.timestamp,
+            shareid: fileData.shareid,
+            uk: fileData.uk,
+            fs_id: fileData.list[0].fs_id, // Assuming the first item in the list
+          }),
+        });
+        const linkData = await generateLinkResponse.json();
+
+        if (linkData.status !== "success") {
+          throw new Error("Failed to generate download link");
+        }
+
+        // Step 4: Initiate download
+        const downloadLink = linkData.download_link;
+        window.location.href = downloadLink; // Redirect to the download link
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to download the video. Please try again.");
+      } finally {
         downloadBtn.disabled = false;
         downloadBtn.innerText = "Download Video";
-      }, 5000); // 5 সেকেন্ড পরে বাটন স্টেট রিসেট করুন
-    }
+      }
+    });
   </script>
 </body>
 </html>
