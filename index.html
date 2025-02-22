@@ -3,114 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terabox Video Downloader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>TeraBox Video Downloader</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
+            background-color: #f4f4f4;
         }
-        input {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: blue;
+	.wood {
             color: white;
-            border: none;
-            cursor: pointer;
+            font-size: 8px;
+            padding: 5px;
+	 }   
+        .logo {
+            display: block;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto 5px; /* উপরে 10px, নিচে 5px গ্যাপ */
+            width: 300px;  
+            height: 150px; /* ✅ Height কমানো হয়েছে */
+            object-fit: contain; /* ✅ ছবির আকৃতি ঠিক রাখবে */
+            text-align: center; /* ✅ কিছু ক্ষেত্রে কাজ করতে পারে */
         }
-        button:hover {
-            background-color: darkblue;
+        .description {
+            font-size: 18px;
+            font-weight: bold;
+            color: #222;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0);
+            display: inline-block;
+            margin-bottom: 20px;
         }
-        #result {
+        input, button {
+            padding: 10px;
+            margin: 10px;
+        }
+        #downloadSection {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0);
             margin-top: 20px;
+        }
+        #thumbnail {
+            width: 200px;
+            display: none;
+            border-radius: 8px;
+        }
+        /* ✅ 3D Loading Spinner */
+        #loadingSpinner {
+            display: none;
+            margin: 10px auto;
+            width: 40px;
+            height: 40px;
+            border: 6px solid #0044ff;
+            border-top: 6px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translateY(-50%);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* ✅ Fixed Footer (Centered) */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            padding: 5px;
+            font-size: 14px;
+            border-top: 6px solid transparent;
+            left: 0;
+            right: 0;
+	    border: 2px solid green;
+            box-shadow: 3px 6px DeepPink;
+            border-top-color: DarkMagenta;
+        }
+        /* ✅ Video Player Modal */
+        #videoModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 8px rgba(43, 169, 237);
+        }
+        #videoModal video {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 4px 4px 8px rgba(202, 237, 232);
+        }
+        .close-btn {
+            background: red;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <h2>Terabox Video Downloader</h2>
-    <input type="text" id="teraboxUrl" placeholder="Enter Terabox Link">
-    <button onclick="downloadVideo()">Download</button>
+    <img src="https://i.ibb.co/fYSBVwf9/angel-op.png" alt="Logo" class="logo">
+    <div class="description">जो दिल के करीब थे ,वो जबसे दुश्मन हो गए
+जमाने में हुए चर्चे ,हम मशहूर हो गए</div>
+
+    <input type="text" id="urlInput" placeholder="Enter TeraBox URL">
+    <button onclick="fetchDownloadLink()"><i class="fa fa-external-link" aria-hidden="true"></i> Get Download Link</button>
     
-    <div id="result"></div>
+    <!-- ✅ 3D Loading Spinner -->
+    <div id="loadingSpinner"></div>
+
+    <div id="downloadSection">
+        <h3><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Download Details</h3>
+        <p><strong>📄 File Name:</strong> <span id="fileName"></span></p>
+        <p><strong>📦 File Size:</strong> <span id="fileSize"></span></p>
+        <img id="thumbnail" src="" alt="Thumbnail">
+        <br>
+        <a id="downloadButton" style="display: none;" download>
+            <button><i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i> Download</button>
+        </a>
+        <button id="watchButton" style="display: none;" onclick="openVideoPlayer()"><i class="fa fa-play" aria-hidden="true"></i> Watch Online</button>
+        <a id="thumbButton" style="display: none;" download>
+            <button>🖼 Download Thumbnail</button>
+        </a>
+    </div>
+
+    <!-- ✅ Video Modal Player -->
+    <div id="videoModal">
+        <video id="videoPlayer" controls></video>
+        <br>
+        <button class="close-btn" onclick="closeVideoPlayer()"><b><i class="fa fa-times" aria-hidden="true"></i> Close</button>
+    </div>
+
+    <!-- ✅ Fixed Footer -->
+    <div class="footer">
+        Developed by <a href="https://t.me/Farooq_is_king" target="_blank" style="color: #ffcc00;"><i class="fa fa-user-circle-o" aria-hidden="true"></i> 𝐖𝐎𝐎𝐃𝐜𝐫𝐚𝐟𝐭</a>
+	    <p class="wood"> © 2025 TeraBox Video downloader & Player. All rights reserved.</p>
+    </div>
 
     <script>
-        async function downloadVideo() {
-            let url = document.getElementById("teraboxUrl").value;
+        let videoURL = "";
+
+        function fetchDownloadLink() {
+            const url = document.getElementById('urlInput').value.trim();
             if (!url) {
-                alert("Please enter a valid Terabox URL");
+                alert("Please enter a valid TeraBox URL");
                 return;
             }
 
-            document.getElementById("result").innerHTML = "Processing... Please wait.";
+            const button = document.querySelector("button");
+            const spinner = document.getElementById("loadingSpinner");
 
-            try {
-                // 🔹 Step 1: Generate File Details
-                let response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        mode: "default",
-                        url: url
-                    })
-                });
+            // ✅ 3D লোডিং স্পিনার চালু
+            spinner.style.display = "block";
+            button.disabled = true;
 
-                let data = await response.json();
-                console.log("File API Response:", data);
+            fetch(`https://teradl-api.dapuntaratya.com/?url=${encodeURIComponent(url)}`)
+            .then(response => response.json())
+            .then(data => {
+                // ✅ লোডিং স্পিনার বন্ধ
+                spinner.style.display = "none";
+                button.disabled = false;
 
-                if (data.status === "success" && data.list && data.list.length > 0) {
-                    let fileData = data.list[0];
+                if (data.ok && data.downloadLink) {
+                    document.getElementById('fileName').innerText = data.filename || 'Unknown File';
+                    document.getElementById('fileSize').innerText = data.size || 'Unknown Size';
+                    document.getElementById('downloadSection').style.display = 'block';
 
-                    // 🔹 Step 2: Generate Download Link
-                    let linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            mode: "default",
-                            js_token: data.js_token,
-                            cookie: data.cookie,
-                            sign: data.sign,
-                            timestamp: data.timestamp,
-                            shareid: data.shareid,
-                            uk: data.uk,
-                            fs_id: fileData.fs_id
-                        })
-                    });
+                    // ✅ **Download Button**
+                    const downloadButton = document.getElementById('downloadButton');
+                    downloadButton.style.display = 'inline-block';
+                    downloadButton.href = data.downloadLink;
+                    downloadButton.setAttribute("download", data.filename || "video.mp4");
 
-                    let linkData = await linkResponse.json();
-                    console.log("Download Link API Response:", linkData);
+                    // ✅ **Watch Online Button (Updated)**
+                    const watchButton = document.getElementById('watchButton');
+                    watchButton.style.display = 'inline-block';
+                    videoURL = data.downloadLink;
 
-                    // ✅ Fix: Extract the actual download link
-                    if (linkData.status === "success" && linkData.download_link) {
-                        let downloadURL = linkData.download_link;
-
-                        document.getElementById("result").innerHTML = `
-                            <p><b>Download Link:</b> <a href="${downloadURL}" target="_blank" id="downloadBtn">Click Here</a></p>
-                        `;
-
-                        // 🔹 Auto Click to Start Download
-                        setTimeout(() => {
-                            document.getElementById("downloadBtn").click();
-                        }, 1000);
+                    // ✅ **Thumbnail**
+                    const thumbnail = document.getElementById('thumbnail');
+                    const thumbButton = document.getElementById('thumbButton');
+                    if (data.thumbnail) {
+                        thumbnail.src = data.thumbnail;
+                        thumbnail.style.display = 'block';
+                        thumbButton.style.display = 'inline-block';
+                        thumbButton.href = data.thumbnail;
+                        thumbButton.setAttribute("download", "thumbnail.jpg");
                     } else {
-                        document.getElementById("result").innerHTML = "Failed to generate download link.";
+                        thumbnail.style.display = 'none';
+                        thumbButton.style.display = 'none';
                     }
                 } else {
-                    document.getElementById("result").innerHTML = "Failed to fetch file details.";
+                    alert('Download link not available.');
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching download link:', error);
+                alert('Failed to get download link.');
+                spinner.style.display = "none";
+                button.disabled = false;
+            });
+        }
 
-            } catch (error) {
-                console.error(error);
-                document.getElementById("result").innerHTML = "Error fetching download link.";
+        // ✅ Open Video Player Modal
+        function openVideoPlayer() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoURL) {
+                videoPlayer.src = videoURL;
+                document.getElementById('videoModal').style.display = 'block';
+            } else {
+                alert("Video not available.");
             }
+        }
+
+        // ✅ Close Video Player
+        function closeVideoPlayer() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoPlayer').pause();
         }
     </script>
 
