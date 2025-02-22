@@ -123,6 +123,7 @@
                     document.getElementById("videoName").innerText = fileName;
                     document.getElementById("videoSize").innerText = fileSizeMB;
                     document.getElementById("downloadLink").href = fileUrl;
+                    document.getElementById("downloadLink").download = fileName; // Force download
                     
                     document.getElementById("result").style.display = "block";
                 } else {
