@@ -40,88 +40,108 @@
 
     <script>
         async function downloadVideo() {
-    const url = document.getElementById("teraboxUrl").value;
-    if (!url) {
-        alert("Please enter a valid Terabox URL");
-        return;
-    }
-
-    document.getElementById("result").innerHTML = "Processing... Please wait.";
-
-    try {
-        // Step 1: Fetch file details
-        const response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                mode: "default",
-                url: url
-            })
-        });
-
-        const data = await response.json();
-        console.log("File API Response:", data);
-
-        if (data.status === "success" && data.list && data.list.length > 0) {
-            const fileData = data.list[0];
-
-            // Step 2: Generate download link
-            const linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    mode: "default",
-                    js_token: data.js_token,
-                    cookie: data.cookie,
-                    sign: data.sign,
-                    timestamp: data.timestamp,
-                    shareid: data.shareid,
-                    uk: data.uk,
-                    fs_id: fileData.fs_id
-                })
-            });
-
-            const linkData = await linkResponse.json();
-            console.log("Download Link API Response:", linkData);
-
-            // Step 3: Extract the actual download link
-            if (linkData.status === "success" && linkData.download_link) {
-                const downloadURL = linkData.download_link;
-
-                // Step 4: Verify if the download link is an HTML page
-                const fileResponse = await fetch(downloadURL);
-                const fileContent = await fileResponse.text();
-
-                if (fileContent.startsWith("<!DOCTYPE html>") || fileContent.includes("<html")) {
-                    // The response is an HTML page (likely an error or redirect)
-                    document.getElementById("result").innerHTML = "Failed to fetch video. The server returned an HTML page.";
-                    console.error("Server returned an HTML page:", fileContent);
-                } else {
-                    // The response is the actual video file
-                    const anchor = document.createElement("a");
-                    anchor.href = downloadURL;
-                    anchor.download = "video.mp4"; // Set the default filename
-                    document.body.appendChild(anchor);
-                    anchor.click();
-                    document.body.removeChild(anchor);
-
-                    document.getElementById("result").innerHTML = "Download started!";
-                }
-            } else {
-                document.getElementById("result").innerHTML = "Failed to generate download link.";
+            const url = document.getElementById("teraboxUrl").value;
+            if (!url) {
+                alert("Please enter a valid Terabox URL");
+                return;
             }
-        } else {
-            document.getElementById("result").innerHTML = "Failed to fetch file details.";
-        }
 
-    } catch (error) {
-        console.error(error);
-        document.getElementById("result").innerHTML = "Error fetching download link.";
-    }
+            document.getElementById("result").innerHTML = "Processing... Please wait.";
+
+            try {
+                // Step 1: Fetch file details
+                const response = await fetch("https://teradl-api.dapuntaratya.com/generate_file", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mode: "default",
+                        url: url
+                    })
+                });
+
+                const data = await response.json();
+                console.log("File API Response:", data);
+
+                if (data.status === "success" && data.list && data.list.length > 0) {
+                    const fileData = data.list[0];
+
+                    // Step 2: Generate download link
+                    const linkResponse = await fetch("https://teradl-api.dapuntaratya.com/generate_link", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            mode: "default",
+                            js_token: data.js_token,
+                            cookie: data.cookie,
+                            sign: data.sign,
+                            timestamp: data.timestamp,
+                            shareid: data.shareid,
+                            uk: data.uk,
+                            fs_id: fileData.fs_id
+                        })
+                    });
+
+                    const linkData = await linkResponse.json();
+                    console.log("Download Link API Response:", linkData);
+
+                    // Step 3: Verify the download link
+                    if (linkData.status === "success" && linkData.download_link) {
+                        const downloadURL = linkData.download_link;
+
+                        // Step 4: Fetch the download URL to check if it's an HTML page
+                        const fileResponse = await fetch(downloadURL);
+                        const fileContent = await fileResponse.text();
+
+                        if (fileContent.startsWith("<!DOCTYPE html>") || fileContent.includes("<html")) {
+                            // The response is an HTML page (likely an error or redirect)
+                            document.getElementById("result").innerHTML = "Failed to fetch video. The server returned an HTML page.";
+                            console.error("Server returned an HTML page:", fileContent);
+
+                            // Step 5: Parse the HTML page to extract the video URL (if possible)
+                            const parser = new DOMParser();
+                            const htmlDoc = parser.parseFromString(fileContent, "text/html");
+                            const videoElement = htmlDoc.querySelector("video");
+
+                            if (videoElement && videoElement.src) {
+                                // If a video source is found, use it as the download link
+                                const videoURL = videoElement.src;
+                                const anchor = document.createElement("a");
+                                anchor.href = videoURL;
+                                anchor.download = "video.mp4"; // Set the default filename
+                                document.body.appendChild(anchor);
+                                anchor.click();
+                                document.body.removeChild(anchor);
+
+                                document.getElementById("result").innerHTML = "Download started!";
+                            } else {
+                                document.getElementById("result").innerHTML = "No video source found in the HTML page.";
+                            }
+                        } else {
+                            // The response is the actual video file
+                            const anchor = document.createElement("a");
+                            anchor.href = downloadURL;
+                            anchor.download = "video.mp4"; // Set the default filename
+                            document.body.appendChild(anchor);
+                            anchor.click();
+                            document.body.removeChild(anchor);
+
+                            document.getElementById("result").innerHTML = "Download started!";
+                        }
+                    } else {
+                        document.getElementById("result").innerHTML = "Failed to generate download link.";
+                    }
+                } else {
+                    document.getElementById("result").innerHTML = "Failed to fetch file details.";
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById("result").innerHTML = "Error fetching download link.";
+            }
         }
     </script>
 
